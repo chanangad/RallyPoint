@@ -152,10 +152,8 @@
 </button>
 </div>
 
-<!-- Unlock Panel -->
-<div id="panel-unlock" class="p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
-<div class="space-y-8">
-<form id="unlock-form" class="space-y-6">
+<div class="p-10 border-b border-outline-variant/10">
+<form id="license-form" class="grid grid-cols-1 md:grid-cols-2 gap-8">
 <div class="relative group">
 <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-outline mb-1">Watch Claim Code</label>
 <input id="claim-code-input" name="claim-code" type="text" required class="w-full bg-transparent border-0 border-b-2 border-outline-variant py-2 text-xl font-bold text-on-surface placeholder:text-outline-variant/30 focus:ring-0 focus:border-[#cafd00]" placeholder="RP-12345"/>
@@ -163,9 +161,14 @@
 </div>
 <div class="relative group">
 <label class="block text-[10px] font-black uppercase tracking-[0.2em] text-outline mb-1">Email Address</label>
-<input id="unlock-email" name="email" type="email" required class="w-full bg-transparent border-0 border-b-2 border-outline-variant py-2 text-xl font-bold text-on-surface placeholder:text-outline-variant/30 focus:ring-0 focus:border-[#cafd00]" placeholder="player@rallypoint.app"/>
+<input id="license-email" name="email" type="email" required class="w-full bg-transparent border-0 border-b-2 border-outline-variant py-2 text-xl font-bold text-on-surface placeholder:text-outline-variant/30 focus:ring-0 focus:border-[#cafd00]" placeholder="player@rallypoint.app"/>
 </div>
 </form>
+</div>
+
+<!-- Unlock Panel -->
+<div id="panel-unlock" class="p-10 grid grid-cols-1 md:grid-cols-2 gap-10">
+<div class="space-y-8">
 <div class="p-4 rounded bg-surface-container-low border border-outline-variant/10 flex items-start gap-3">
 <span class="material-symbols-outlined text-[#cafd00] text-sm">info</span>
 <p id="unlock-status" class="text-[10px] text-on-surface-variant font-bold uppercase leading-relaxed">Works on all Garmin watches — AMOLED and MIP. One license per device.</p>
@@ -173,7 +176,7 @@
 </div>
 <div class="flex flex-col justify-center space-y-4">
 <div class="text-[10px] font-black text-outline uppercase tracking-[0.3em]">Select Payment Gateway</div>
-<button type="submit" form="unlock-form" class="w-full py-4 rounded border border-outline-variant/30 bg-surface-container-highest text-on-surface font-black text-xs uppercase tracking-[0.15em] hover:border-primary/20 hover:bg-surface-container-high active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<button type="button" id="paypal-button" class="w-full py-4 rounded border border-outline-variant/30 bg-surface-container-highest text-on-surface font-black text-xs uppercase tracking-[0.15em] hover:border-primary/20 hover:bg-surface-container-high active:scale-[0.98] transition-all flex items-center justify-center gap-2">
 <span class="material-symbols-outlined text-sm">public</span>
 Pay with PayPal (International)
 </button>
@@ -197,16 +200,6 @@ Pay with Razorpay (India)
 <!-- Restore Panel -->
 <div id="panel-restore" class="p-10 grid grid-cols-1 md:grid-cols-2 gap-10" hidden>
 <div class="space-y-8">
-<form id="restore-form" class="space-y-6">
-<div class="relative group">
-<label class="block text-[10px] font-black uppercase tracking-[0.2em] text-outline mb-1">Watch Claim Code</label>
-<input id="restore-claim-code-input" name="restore-claim-code" type="text" required class="w-full bg-transparent border-0 border-b-2 border-outline-variant py-2 text-xl font-bold text-on-surface placeholder:text-outline-variant/30 focus:ring-0 focus:border-[#cafd00]" placeholder="RP-12345"/>
-</div>
-<div class="relative group">
-<label class="block text-[10px] font-black uppercase tracking-[0.2em] text-outline mb-1">Email Address</label>
-<input id="restore-email" name="email" type="email" required class="w-full bg-transparent border-0 border-b-2 border-outline-variant py-2 text-xl font-bold text-on-surface placeholder:text-outline-variant/30 focus:ring-0 focus:border-[#cafd00]" placeholder="original-email@example.com"/>
-</div>
-</form>
 <div class="p-4 rounded bg-surface-container-low border border-outline-variant/10 flex items-start gap-3">
 <span class="material-symbols-outlined text-[#cafd00] text-sm">info</span>
 <p id="restore-status" class="text-[10px] text-on-surface-variant font-bold uppercase leading-relaxed">Use the same email from your original purchase. After restore, refresh the license on your watch.</p>
@@ -214,7 +207,7 @@ Pay with Razorpay (India)
 </div>
 <div class="flex flex-col justify-center space-y-4">
 <p class="text-sm text-on-surface-variant font-bold uppercase">Use the same email you used for your original purchase.</p>
-<button type="submit" form="restore-form" class="w-full py-4 rounded border-2 border-outline-variant/30 text-on-surface font-black text-xs uppercase tracking-[0.15em] hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<button type="button" id="restore-button" class="w-full py-4 rounded border-2 border-outline-variant/30 text-on-surface font-black text-xs uppercase tracking-[0.15em] hover:bg-surface-container-highest active:scale-[0.98] transition-all flex items-center justify-center gap-2">
 <span class="material-symbols-outlined text-sm">restore</span>
 Restore Previous License
 </button>
@@ -233,16 +226,13 @@ Restore Previous License
     restore: document.getElementById("panel-restore")
   };
   const claimCodeInput = document.getElementById("claim-code-input");
-  const restoreClaimCodeInput = document.getElementById("restore-claim-code-input");
+  const emailInput = document.getElementById("license-email");
   const unlockStatus = document.getElementById("unlock-status");
   const restoreStatus = document.getElementById("restore-status");
 
   const initialCode = query("code").trim().toUpperCase();
   const initialTab = query("tab") === "restore" ? "restore" : "unlock";
-  if (initialCode) {
-    claimCodeInput.value = initialCode;
-    restoreClaimCodeInput.value = initialCode;
-  }
+  claimCodeInput.value = initialCode;
   activateTab(initialTab, false);
 
   function activateTab(name, pushState) {
@@ -266,14 +256,21 @@ Restore Previous License
 
   tabButtons.forEach(btn => btn.addEventListener("click", () => activateTab(btn.dataset.tab, true)));
 
-  // Sync claim codes between tabs
-  function syncCode(val) {
-    const n = val.trim().toUpperCase();
-    claimCodeInput.value = n;
-    restoreClaimCodeInput.value = n;
+  function syncClaimCode(value) {
+    const normalized = value.trim().toUpperCase();
+    claimCodeInput.value = normalized;
+    const params = new URLSearchParams(window.location.search);
+    if (normalized) {
+      params.set("code", normalized);
+    } else {
+      params.delete("code");
+    }
+    if (!params.get("tab")) {
+      params.set("tab", initialTab);
+    }
+    window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
   }
-  claimCodeInput.addEventListener("input", () => syncCode(claimCodeInput.value));
-  restoreClaimCodeInput.addEventListener("input", () => syncCode(restoreClaimCodeInput.value));
+  claimCodeInput.addEventListener("input", () => syncClaimCode(claimCodeInput.value));
 
   // Checkout handlers
   function setStatus(node, msg, kind) {
@@ -287,7 +284,7 @@ Restore Previous License
 
   async function beginCheckout(provider) {
     const code = claimCodeInput.value.trim().toUpperCase();
-    const email = document.getElementById("unlock-email").value.trim();
+    const email = emailInput.value.trim();
     if (!code) { setStatus(unlockStatus, "Enter the claim code shown on your watch.", "warn"); return; }
     if (!email) { setStatus(unlockStatus, "Enter your email first.", "warn"); return; }
 
@@ -305,14 +302,14 @@ Restore Previous License
     } catch (err) { setStatus(unlockStatus, err.message, "warn"); }
   }
 
-  document.getElementById("unlock-form").addEventListener("submit", e => { e.preventDefault(); beginCheckout("paypal"); });
+  document.getElementById("paypal-button").addEventListener("click", () => beginCheckout("paypal"));
   document.getElementById("razorpay-button").addEventListener("click", () => beginCheckout("razorpay"));
 
-  document.getElementById("restore-form").addEventListener("submit", async e => {
-    e.preventDefault();
-    const code = restoreClaimCodeInput.value.trim().toUpperCase();
-    const email = document.getElementById("restore-email").value.trim();
+  document.getElementById("restore-button").addEventListener("click", async () => {
+    const code = claimCodeInput.value.trim().toUpperCase();
+    const email = emailInput.value.trim();
     if (!code) { setStatus(restoreStatus, "Missing claim code.", "warn"); return; }
+    if (!email) { setStatus(restoreStatus, "Enter your email first.", "warn"); return; }
     setStatus(restoreStatus, "Checking your purchase...");
     try {
       const req = await postJson("/api/restore/request", { claimCode: code, email });
