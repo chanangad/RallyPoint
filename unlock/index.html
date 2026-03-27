@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Redirecting to RallyPoint Unlock</title>
+  <meta http-equiv="refresh" content="0; url=../?tab=unlock">
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, system-ui, sans-serif;
+      background: #0d0f0c;
+      color: #fdfcf7;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at top, rgba(202, 253, 0, 0.15), transparent 45%), #0d0f0c;
+    }
+
+    main {
+      width: min(32rem, calc(100vw - 2rem));
+      padding: 2rem;
+      border: 1px solid #474845;
+      background: #181a17;
+      text-align: center;
+    }
+
+    p {
+      color: #ababa6;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Opening Unlock</h1>
+    <p>Redirecting to the RallyPoint unlock page...</p>
+  </main>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    params.set("tab", "unlock");
+    window.location.replace(`../?${params.toString()}`);
+  </script>
+</body>
+</html>

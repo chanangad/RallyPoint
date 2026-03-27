@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RallyPoint Purchase Complete</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      font-family: Inter, system-ui, sans-serif;
+      background: #0d0f0c;
+      color: #fdfcf7;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background:
+        radial-gradient(circle at top, rgba(202, 253, 0, 0.18), transparent 40%),
+        linear-gradient(180deg, #121411 0%, #0d0f0c 100%);
+    }
+
+    main {
+      width: min(38rem, calc(100vw - 2rem));
+      padding: 2rem;
+      border: 1px solid #474845;
+      background: #181a17;
+    }
+
+    h1 {
+      margin-top: 0;
+    }
+
+    p {
+      line-height: 1.6;
+    }
+
+    .copy {
+      color: #ababa6;
+    }
+
+    .status {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      border: 1px solid #1f7a57;
+      background: rgba(0, 255, 171, 0.08);
+      color: #00ffab;
+      font-size: 0.9rem;
+    }
+
+    .status.warn {
+      border-color: #7a3d2d;
+      background: rgba(255, 115, 81, 0.08);
+      color: #ff7351;
+    }
+
+    a {
+      display: inline-block;
+      margin-top: 1.5rem;
+      color: #4a5e00;
+      background: #cafd00;
+      padding: 0.75rem 1rem;
+      text-decoration: none;
+      font-weight: 700;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Payment Complete</h1>
+    <p id="success-copy" class="copy">
+      Confirming your PayPal payment with the backend. Please keep this page open for a moment.
+    </p>
+    <p id="success-status" class="status">Finalizing checkout...</p>
+    <a href="../">Back to Home</a>
+  </main>
+
+  <script src="../app.js"></script>
+  <script>
+    const successCopy = document.getElementById("success-copy");
+    const successStatus = document.getElementById("success-status");
+    const paypalToken = query("token").trim();
+    const razorpayStatus = query("razorpay_payment_link_status").trim().toLowerCase();
+
+    async function finalizePayPalCheckout() {
+      if (razorpayStatus) {
+        if (razorpayStatus === "paid") {
+          successCopy.innerHTML = "Your payment is confirmed. Return to the watch app and choose <strong>Refresh License</strong>.";
+          successStatus.textContent = "Razorpay payment marked as paid.";
+          successStatus.className = "status";
+        } else {
+          successCopy.textContent = "Your Razorpay checkout has not finished yet.";
+          successStatus.textContent = `Razorpay reported status: ${razorpayStatus}.`;
+          successStatus.className = "status warn";
+        }
+        return;
+      }
+
+      if (!paypalToken) {
+        successCopy.textContent = "Return to the watch app and use Refresh License after your payment finishes.";
+        successStatus.textContent = "No payment token was found in the URL.";
+        successStatus.className = "status";
+        return;
+      }
+
+      try {
+        await postJson("/api/paypal/capture-order", {orderId: paypalToken});
+        successCopy.innerHTML = "Your payment is confirmed. Return to the watch app and choose <strong>Refresh License</strong>.";
+        successStatus.textContent = "PayPal payment captured successfully.";
+        successStatus.className = "status";
+      } catch (error) {
+        successCopy.innerHTML = "We could not finalize the PayPal payment automatically yet. Return to the watch app and try <strong>Refresh License</strong> again in a few seconds.";
+        successStatus.textContent = error.message;
+        successStatus.className = "status warn";
+      }
+    }
+
+    finalizePayPalCheckout();
+  </script>
+</body>
+</html>
