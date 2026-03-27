@@ -1,4 +1,4 @@
-const API_BASE = "https://shuttlescore-unlock-worker.roxzone.workers.dev";
+const API_BASE = "https://rallypoint-unlock-worker.roxzone.workers.dev";
 
 function query(name) {
   const params = new URLSearchParams(window.location.search);
@@ -8,7 +8,7 @@ function query(name) {
 async function postJson(path, payload) {
   const response = await fetch(`${API_BASE}${path}`, {
     method: "POST",
-    headers: {"Content-Type": "application/json"},
+    headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
   });
 
